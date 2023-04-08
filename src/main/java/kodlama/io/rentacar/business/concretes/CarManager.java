@@ -8,6 +8,7 @@ import kodlama.io.rentacar.business.dto.responses.get.GetAllCarsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.GetCarResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateCarResponse;
 import kodlama.io.rentacar.entities.Car;
+import kodlama.io.rentacar.entities.enums.State;
 import kodlama.io.rentacar.repository.CarRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,30 +23,34 @@ public class CarManager implements CarService {
     private final ModelMapper mapper;
 
     @Override
-    public List<GetAllCarsResponse> getAll(boolean isAvailable) {
-        List<Car> cars = repository.findAll();
-        List<GetAllCarsResponse> responses = cars
+    public List<GetAllCarsResponse> getAll(boolean includeMaintenance) {
+        List<Car> cars = filterCarsByMaintenanceState(includeMaintenance);
+        List<GetAllCarsResponse> response = cars
                 .stream()
-                .filter(car -> (isAvailable == false  && car.getState() != 3) || (isAvailable == true))
                 .map(car -> mapper.map(car, GetAllCarsResponse.class))
                 .toList();
-        return responses;
+
+        return response;
     }
 
     @Override
     public GetCarResponse getById(int id) {
         checkIfCarExists(id);
-        Car car= repository.findById(id).orElseThrow();
+        Car car = repository.findById(id).orElseThrow();
         GetCarResponse response = mapper.map(car, GetCarResponse.class);
+//        response.setBrandName(car.getModel().getBrand().getName());
+
         return response;
     }
 
     @Override
     public CreateCarResponse add(CreateCarRequest request) {
-        checkIfCarExistsByPlate(request.getPlate());
         Car car = mapper.map(request, Car.class);
+        car.setId(0);
+        car.setState(State.AVAILABLE);
         repository.save(car);
         CreateCarResponse response = mapper.map(car, CreateCarResponse.class);
+
         return response;
     }
 
@@ -56,30 +61,35 @@ public class CarManager implements CarService {
         car.setId(id);
         repository.save(car);
         UpdateCarResponse response = mapper.map(car, UpdateCarResponse.class);
+
         return response;
     }
 
     @Override
     public void delete(int id) {
+        checkIfCarExists(id);
         repository.deleteById(id);
-
     }
 
     @Override
-    public void changeState(int id, int state) {
-        checkIfCarExists(id);
-        Car car = repository.findById(id).orElseThrow();
+    public void changeState(int carId, State state) {
+//        checkIfCarExists(carId);
+        Car car = repository.findById(carId).orElseThrow();
         car.setState(state);
         repository.save(car);
     }
 
     private void checkIfCarExists(int id) {
-        if (!repository.existsById(id)) throw new IllegalArgumentException("böyle bir araba mevcut değildir");
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Böyle bir araç bulunamadı!");
+        }
     }
 
-    private void checkIfCarExistsByPlate(String plate) {
-        if (repository.existsByPlateIgnoreCase(plate)) {
-            throw new RuntimeException("böyle bir araba zaten kayıtlı");
+    private List<Car> filterCarsByMaintenanceState(boolean includeMaintenance) {
+        if (includeMaintenance) {
+            return repository.findAll();
         }
+
+        return repository.findAllByStateIsNot(State.MAINTENANCE);
     }
 }

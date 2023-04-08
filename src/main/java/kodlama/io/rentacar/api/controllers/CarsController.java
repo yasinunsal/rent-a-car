@@ -14,39 +14,35 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cars")
 @AllArgsConstructor
-
+@RequestMapping("/api/cars")
 public class CarsController {
-    private final CarService carService;
-
+    private final CarService service;
 
     @GetMapping
-    public List<GetAllCarsResponse> getAll(@RequestParam boolean isAvailable) {
-        return carService.getAll(isAvailable);
+    public List<GetAllCarsResponse> getAll(@RequestParam(defaultValue = "true") boolean includeMaintenance) {
+        return service.getAll(includeMaintenance);
     }
 
     @GetMapping("/{id}")
     public GetCarResponse getById(@PathVariable int id) {
-        return carService.getById(id);
+        return service.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CreateCarResponse add(@RequestBody CreateCarRequest request) {
-        return carService.add(request);
+        return service.add(request);
     }
 
     @PutMapping("/{id}")
     public UpdateCarResponse update(@PathVariable int id, @RequestBody UpdateCarRequest request) {
-        return carService.update(id, request);
-
+        return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable int id) {
-        carService.delete(id);
+        service.delete(id);
     }
 }
-

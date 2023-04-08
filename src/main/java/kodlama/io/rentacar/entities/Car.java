@@ -1,6 +1,7 @@
 package kodlama.io.rentacar.entities;
 
 import jakarta.persistence.*;
+import kodlama.io.rentacar.entities.enums.State;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,8 @@ public class Car {
     private int id;
     private int modelYear;
     private String plate;
-    private int state; // 1 - Available, 2 - Rented, 3 - Maintance
+    @Enumerated(EnumType.STRING)
+    private State state;
     private double dailyPrice;
 
     @ManyToOne
@@ -29,5 +31,5 @@ public class Car {
     private Model model;
 
     @OneToMany(mappedBy = "car")
-    private List<Maintenance> maintenance = new ArrayList<>();
+    private List<Maintenance> maintenances;
 }
