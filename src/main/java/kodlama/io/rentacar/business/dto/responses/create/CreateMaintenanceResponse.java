@@ -7,10 +7,10 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Setter
-@AllArgsConstructor
+@Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class CreateMaintenanceResponse {
     private int id;
     private int carId;
@@ -19,3 +19,4 @@ public class CreateMaintenanceResponse {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 }
+

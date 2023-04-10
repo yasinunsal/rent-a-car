@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,11 +24,11 @@ public class Car {
     @Enumerated(EnumType.STRING)
     private State state;
     private double dailyPrice;
-
     @ManyToOne
     @JoinColumn(name = "model_id")
     private Model model;
-
     @OneToMany(mappedBy = "car")
     private List<Maintenance> maintenances;
+    @OneToMany(mappedBy = "car")
+    private List<Rental> rentals;
 }

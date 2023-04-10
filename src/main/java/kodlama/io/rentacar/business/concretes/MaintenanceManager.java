@@ -8,7 +8,6 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateMaintenanceRespon
 import kodlama.io.rentacar.business.dto.responses.get.GetAllMaintenancesResponse;
 import kodlama.io.rentacar.business.dto.responses.get.GetMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateMaintenanceResponse;
-import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.Maintenance;
 import kodlama.io.rentacar.entities.enums.State;
 import kodlama.io.rentacar.repository.MaintenanceRepository;
@@ -16,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -88,6 +88,7 @@ public class MaintenanceManager implements MaintenanceService {
     @Override
     public void delete(int id) {
         checkIfMaintenanceExists(id);
+        makeCarAvailableIfIsCompletedFalse(id);
         repository.deleteById(id);
     }
 
@@ -112,6 +113,13 @@ public class MaintenanceManager implements MaintenanceService {
     private void checkCarAvailabilityForMaintenance(CreateMaintenanceRequest request) {
         if (carService.getById(request.getCarId()).getState().equals(State.RENTED)) {
             throw new RuntimeException("Araç kirada olduğu için bakıma alınamaz!");
+        }
+    }
+
+    private void makeCarAvailableIfIsCompletedFalse(int id) {
+        int carId = repository.findById(id).get().getCar().getId();
+        if (repository.existsByCarIdAndIsCompletedIsFalse(carId)) {
+            carService.changeState(carId, State.AVAILABLE);
         }
     }
 }

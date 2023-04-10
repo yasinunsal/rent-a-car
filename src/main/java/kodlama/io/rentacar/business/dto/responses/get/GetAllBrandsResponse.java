@@ -1,12 +1,9 @@
 package kodlama.io.rentacar.business.dto.responses.get;
 
-import kodlama.io.rentacar.entities.Model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Setter
 @Getter
